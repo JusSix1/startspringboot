@@ -2,7 +2,6 @@ package com.jussix.training.startspringboot.business;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.jussix.training.startspringboot.entity.User;
@@ -10,7 +9,12 @@ import com.jussix.training.startspringboot.exception.FileException;
 import com.jussix.training.startspringboot.mapper.UserMapper;
 import com.jussix.training.startspringboot.model.MLoginRequest;
 import com.jussix.training.startspringboot.model.MRegisterResponse;
+import com.jussix.training.startspringboot.service.TokenService;
 import com.jussix.training.startspringboot.service.UserService;
+import com.jussix.training.startspringboot.util.SecurityUtil;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.jussix.training.startspringboot.exception.BaseException;
@@ -23,10 +27,13 @@ public class UserBusiness {
 
     private final UserService userService;
 
+    private final TokenService tokenService;
+
     private final UserMapper userMapper;
 
-    public UserBusiness(UserService userService, UserMapper userMapper) {
+    public UserBusiness(UserService userService, TokenService tokenService, UserMapper userMapper) {
         this.userService = userService;
+        this.tokenService = tokenService;
         this.userMapper = userMapper;
     }
 
@@ -38,7 +45,7 @@ public class UserBusiness {
 
     }
 
-    public String login(MLoginRequest request) throws UserException {
+    public String login(MLoginRequest request) throws BaseException {
 
         //Validate request
 
@@ -53,13 +60,28 @@ public class UserBusiness {
             throw UserException.loginFailPasswordIncorrect();
         }
 
-        //TODO: generate JWT
-
-        return "JWT TO DO";
+        return tokenService.tokenize(user);
 
     }
 
-    public String uploadProfilePicture(MultipartFile file) throws FileException {
+    public String refreshToken() throws BaseException {
+        Optional<String> opt = SecurityUtil.getCurrentUserId();
+        if(opt.isEmpty()){
+            throw UserException.unauthorized();
+        }
+
+        String userId = opt.get();
+
+        Optional<User> optUser = userService.findById(userId);
+        if(optUser.isEmpty()){
+            throw UserException.notFound();
+        }
+
+        User user = optUser.get();
+        return tokenService.tokenize(user);
+    }
+
+    public String uploadProfilePicture(MultipartFile file) throws BaseException{
         //Validate file
         if (file == null) {
             throw FileException.fileNull();

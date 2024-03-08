@@ -22,7 +22,7 @@ public class ProductApi {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<String> getProductbyID(@PathVariable("id") String id) throws ProductException {
+    public ResponseEntity<String> getProductByID(@PathVariable("id") String id) throws ProductException {
         String response = business.getProductById(id);
         return ResponseEntity.ok(response);
     }
