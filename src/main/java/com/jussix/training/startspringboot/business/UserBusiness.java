@@ -12,9 +12,6 @@ import com.jussix.training.startspringboot.model.MRegisterResponse;
 import com.jussix.training.startspringboot.service.TokenService;
 import com.jussix.training.startspringboot.service.UserService;
 import com.jussix.training.startspringboot.util.SecurityUtil;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.jussix.training.startspringboot.exception.BaseException;
